@@ -1,6 +1,12 @@
 package service
 
-import "App/entity"
+import (
+	"App/entity"
+
+	"gorm.io/gorm"
+)
+
+var db *gorm.DB
 
 type ThreadService interface {
 	Save(entity.Threads) entity.Threads
@@ -11,14 +17,14 @@ type threadService struct {
 	threads []entity.Threads
 }
 
-func New() ThreadService {
+func NewThreadService() ThreadService {
 	return &threadService{
 		threads: []entity.Threads{},
 	}
 }
 
 func (service *threadService) Save(thread entity.Threads) entity.Threads {
-	service.threads = append(service.threads, thread)
+	db.Create(&thread)
 	return thread
 }
 
