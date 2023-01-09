@@ -1,33 +1,46 @@
 package service
 
 import (
+	"App/data"
 	"App/entity"
-
-	"gorm.io/gorm"
 )
-
-var db *gorm.DB
 
 type ThreadService interface {
 	Save(entity.Threads) entity.Threads
-	List() []entity.Threads
+	Update(thread entity.Threads) entity.Threads
+	Delete(thread entity.Threads)
+	List(category string) []entity.Threads
+	GetPost(tid uint64) entity.Threads
 }
 
 type threadService struct {
-	threads []entity.Threads
+	threadData data.Data
 }
 
-func NewThreadService() ThreadService {
+func NewThreadService(data data.Data) ThreadService {
 	return &threadService{
-		threads: []entity.Threads{},
+		threadData: data,
 	}
 }
 
 func (service *threadService) Save(thread entity.Threads) entity.Threads {
-	db.Create(&thread)
+	service.threadData.Save(thread)
 	return thread
 }
 
-func (service *threadService) List() []entity.Threads {
-	return service.threads
+func (service *threadService) Update(thread entity.Threads) entity.Threads {
+	service.threadData.Update(thread)
+	return thread
+}
+
+func (service *threadService) Delete(thread entity.Threads) {
+	service.threadData.Delete(thread)
+}
+
+func (service *threadService) List(category string) []entity.Threads {
+	return service.threadData.List(category)
+}
+
+func (service *threadService) GetPost(tid uint64) entity.Threads {
+	return service.threadData.GetPost(tid)
 }

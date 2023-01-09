@@ -1,33 +1,60 @@
 package service
 
 import (
+	"App/data"
 	"App/entity"
+	"errors"
 
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type UserService interface {
-	Register(entity.Users) entity.Users
-	Login(entity.Users) entity.Users
+	Register(newUser entity.Users) error
+	Login(email string, password string) bool
 }
 
-func Register(newUser entity.Users) error {
-	passHash, err := getPasswordHash(newUser.Password)
+type userService struct {
+	userData data.Data
+}
+
+func NewUserService(data data.Data) UserService {
+	return &userService{
+		userData: data,
+	}
+}
+
+func (service *userService) Register(newUser entity.Users) error {
+	var storedUser entity.Users
+	err := data.DB.Where("email = ?", newUser.Email).First(&storedUser).Error
+	if err == nil {
+		return errors.New("Email already registered")
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-	newSecureUser := entity.SecureUsers{
-		Email:    newUser.Email,
-		Password: passHash,
-		Username: newUser.Username,
-	}
+	newUser.Password = string(hashedPassword)
 
-	db.Create(&newSecureUser)
-
+	service.userData.SaveUser(newUser)
 	return nil
 }
 
-func getPasswordHash(pass string) (string, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(pass), 0)
-	return string(hash), err
+func (service *userService) Login(email string, password string) bool {
+	var storedUser entity.Users
+	var err error
+	err = data.DB.Where("email = ?", email).First(&storedUser).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false
+		}
+		return false
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(password))
+	if err != nil {
+		return false
+	}
+	return true
 }

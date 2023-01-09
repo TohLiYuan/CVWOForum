@@ -1,27 +1,35 @@
 package service
 
-import "App/entity"
+import (
+	"App/data"
+	"App/entity"
+)
 
 type CommentService interface {
-	Save(entity.Comments) entity.Comments
-	List() []entity.Comments
+	SaveComment(comment entity.Comments) entity.Comments
+	DeleteComment(comment entity.Comments)
+	ListComment(tid uint64) []entity.Comments
 }
 
 type commentService struct {
-	comments []entity.Comments
+	commentData data.Data
 }
 
-func NewCommentService() CommentService {
+func NewCommentService(data data.Data) CommentService {
 	return &commentService{
-		comments: []entity.Comments{},
+		commentData: data,
 	}
 }
 
-func (service *commentService) Save(comment entity.Comments) entity.Comments {
-	service.comments = append(service.comments, comment)
+func (service *commentService) SaveComment(comment entity.Comments) entity.Comments {
+	service.commentData.SaveComment(comment)
 	return comment
 }
 
-func (service *commentService) List() []entity.Comments {
-	return service.comments
+func (service *commentService) DeleteComment(comment entity.Comments) {
+	service.commentData.DeleteComment(comment)
+}
+
+func (service *commentService) ListComment(tid uint64) []entity.Comments {
+	return service.commentData.ListComment(tid)
 }

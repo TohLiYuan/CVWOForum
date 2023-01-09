@@ -18,14 +18,21 @@ const (
 
 type Data interface {
 	CloseDB()
-}
 
-type ThreadData interface {
 	Save(thread entity.Threads)
 	Update(thread entity.Threads)
 	Delete(thread entity.Threads)
-	List() []entity.Threads
+	List(cat string) []entity.Threads
+	GetPost(tid uint64) entity.Threads
+
+	SaveComment(comment entity.Comments)
+	DeleteComment(comment entity.Comments)
+	ListComment(tid uint64) []entity.Comments
+
+	SaveUser(user entity.Users)
 }
+
+var DB *gorm.DB
 
 type database struct {
 	connection *gorm.DB
@@ -33,17 +40,18 @@ type database struct {
 
 func NewData() Data {
 	psqlconn := fmt.Sprintf("host=%s user = %s password=%s dbname=%s port=%d sslmode=disable", host, user, password, dbname, port)
+	var err error
 
-	db, err := gorm.Open(postgres.Open(psqlconn), &gorm.Config{})
+	DB, err = gorm.Open(postgres.Open(psqlconn), &gorm.Config{})
 
 	if err != nil {
 		panic(err)
 	}
 
-	db.AutoMigrate(&entity.Users{}, &entity.Threads{}, &entity.Comments{})
+	DB.AutoMigrate(&entity.Users{}, &entity.Threads{}, &entity.Comments{})
 
 	return &database{
-		connection: db,
+		connection: DB,
 	}
 }
 
