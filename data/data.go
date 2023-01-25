@@ -12,8 +12,8 @@ const (
 	host     = "localhost"
 	port     = 5432
 	user     = "postgres"
-	password = "Toh-10030501"
-	dbname   = "CVWOForum"
+	password = ""
+	dbname   = ""
 )
 
 type Data interface {

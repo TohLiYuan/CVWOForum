@@ -7,6 +7,7 @@ import (
 	"App/service"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,6 +26,14 @@ var (
 
 func main() {
 	server := gin.Default()
+
+	server.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"POST, GET, PUT, DELETE"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
 	server.POST("/register", func(ctx *gin.Context) {
 		err := userController.Register(ctx)
@@ -54,8 +63,7 @@ func main() {
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		} else {
-			ctx.JSON(http.StatusOK, gin.H{"thread": t})
-			ctx.JSON(http.StatusOK, gin.H{"comments": c})
+			ctx.JSON(http.StatusOK, gin.H{"thread": t, "comments": c})
 		}
 	})
 
